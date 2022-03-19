@@ -1,10 +1,8 @@
 import 'dart:math';
 
-import '../domain/index.dart';
+import 'package:game_of_life/domain/index.dart';
 
-typedef Field = List<List<CellState>>;
-
-class GameStateImpl implements GameState<Field> {
+class GameStateImpl implements GameState<CellField> {
   const GameStateImpl._(this.data, this.isGameRunning);
 
   factory GameStateImpl.empty(int gridSize, {bool isGameRunning = false}) {
@@ -14,18 +12,23 @@ class GameStateImpl implements GameState<Field> {
     );
   }
 
-  factory GameStateImpl.fromSeed(int gridSize, {bool isGameRunning = false}) {
+  factory GameStateImpl.randomize(int gridSize, {bool isGameRunning = false}) {
     final random = Random();
 
     return GameStateImpl._(
-      List.generate(gridSize,
-          (int index) => List.generate(gridSize, (int index) => random.nextBool() ? CellState.alive : CellState.dead)),
+      List.generate(
+        gridSize,
+        (int index) => List.generate(
+          gridSize,
+          (int index) => random.nextBool() ? CellState.alive : CellState.dead,
+        ),
+      ),
       isGameRunning,
     );
   }
 
   @override
-  final Field data;
+  final CellField data;
 
   @override
   final bool isGameRunning;
@@ -61,7 +64,7 @@ class GameStateImpl implements GameState<Field> {
 
   @override
   GameStateImpl copyWith({
-    Field? data,
+    CellField? data,
     bool? isGameRunning,
   }) {
     return GameStateImpl._(

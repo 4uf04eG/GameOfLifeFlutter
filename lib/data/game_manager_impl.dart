@@ -1,13 +1,11 @@
 import 'dart:async';
+import 'dart:math';
 
-import 'package:game_of_life/data/game_configuration_impl.dart';
-import 'package:game_of_life/data/game_state_impl.dart';
-import 'package:game_of_life/domain/cell_state.dart';
-import 'package:game_of_life/domain/game_configuration.dart';
-import 'package:game_of_life/domain/game_manager.dart';
+import 'package:game_of_life/data/index.dart';
+import 'package:game_of_life/domain/index.dart';
 
-class GameManagerImpl implements GameManager<Field, CellState> {
-  GameManagerImpl.initial() {
+class GameManagerImpl implements GameManager<CellField, CellState> {
+  GameManagerImpl() {
     _initGame();
   }
 
@@ -24,10 +22,9 @@ class GameManagerImpl implements GameManager<Field, CellState> {
     _controller = StreamController<GameStateImpl>();
     state = _controller.stream.asBroadcastStream();
 
-    _configuration = GameConfigurationImpl();
-    _setState(GameStateImpl.fromSeed(_configuration.gridSize));
+    _configuration = const GameConfigurationImpl();
+    _setState(GameStateImpl.empty(_configuration.gridSize));
   }
-
   @override
   void pauseGame() {
     _timer?.cancel();
@@ -48,22 +45,21 @@ class GameManagerImpl implements GameManager<Field, CellState> {
   void _setupTimer() {
     _timer?.cancel();
     _timer = Timer.periodic(
-      Duration(seconds: _configuration.tickTimeInSec),
+      Duration(milliseconds: _configuration.tickTimeInMs),
       (_) => moveToNextState(),
     );
   }
 
   @override
   void moveToNextState() {
-    final original = _lastState.copyWith();
-    final gridSize = _configuration.gridSize;
+    final GameStateImpl original = _lastState.copyWith(data: [for (final List<CellState> row in _lastState.data) [...row]]);
+    final int gridSize = _configuration.gridSize;
 
     for (int row = 0; row < gridSize; row++) {
       for (int column = 0; column < gridSize; column++) {
-        final neighboursCount = original.calculateNumberOfNeighbors(column, row);
+        final int neighboursCount = original.calculateNumberOfNeighbors(column, row);
 
         if (neighboursCount < 2) {
-          print(neighboursCount);
           _lastState.data[row][column] = CellState.dead;
         } else if (neighboursCount <= 3 && _lastState.data[row][column] == CellState.alive) {
           // Let it live
@@ -79,20 +75,39 @@ class GameManagerImpl implements GameManager<Field, CellState> {
   }
 
   @override
-  void updateState(int x, int y, CellState value) {
+  void setCellValue(int x, int y, CellState value) {
     _setState(_lastState.copyWith(data: _lastState.data..[y][x] = value));
+  }
+
+  @override
+  void speedUp() {
+    final int step = _configuration.tickStep;
+    final int time = _configuration.tickTimeInMs;
+    _timer?.cancel();
+    updateConfiguration(_configuration.copyWith(tickTimeInMs: max(time - step, 0)));
+  }
+
+  @override
+  void speedDown() {
+    final int step = _configuration.tickStep;
+    final int time = _configuration.tickTimeInMs;
+    _timer?.cancel();
+    updateConfiguration(_configuration.copyWith(tickTimeInMs: min(time + step, 1000)));
   }
 
   @override
   void updateConfiguration(GameConfiguration configuration) {
     _configuration = configuration;
-    _setupTimer();
+
+    if (_lastState.isGameRunning) {
+      _setupTimer();
+    }
   }
 
   @override
   void resetGame() {
-    updateConfiguration(GameConfigurationImpl());
     _setState(GameStateImpl.empty(_configuration.gridSize));
+    _timer?.cancel();
   }
 
   @override

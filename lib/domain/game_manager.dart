@@ -12,7 +12,11 @@ abstract class GameManager<S, V> {
 
   void moveToNextState();
 
-  void updateState(int x, int y, V value);
+  void setCellValue(int x, int y, V value);
+
+  void speedUp();
+
+  void speedDown();
 
   void updateConfiguration(GameConfiguration configuration);
 

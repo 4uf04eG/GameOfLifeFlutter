@@ -1,39 +1,22 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:game_of_life/data/game_manager_impl.dart';
-import 'package:game_of_life/data/game_state_impl.dart';
+import 'package:game_of_life/app/widgets/control_strip.dart';
+import 'package:game_of_life/app/widgets/game_field_painter.dart';
+import 'package:game_of_life/data/index.dart';
+import 'package:game_of_life/domain/index.dart';
 
-import '../../domain/index.dart';
-
-class GameFieldPage extends StatelessWidget {
+class GameFieldPage extends StatefulWidget {
   const GameFieldPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Center(child: GameField()),
-      ),
-    );
-  }
+  State<GameFieldPage> createState() => _GameFieldPageState();
 }
 
-class GameField extends StatefulWidget {
-  const GameField({Key? key}) : super(key: key);
-
-  @override
-  State<GameField> createState() => _GameFieldState();
-}
-
-class _GameFieldState extends State<GameField> {
-  late final GameManager<Field, CellState> manager;
-
-  bool isDragStarted = false;
+class _GameFieldPageState extends State<GameFieldPage> {
+  late final GameManager<CellField, CellState> manager;
 
   @override
   void initState() {
-    manager = GameManagerImpl.initial();
+    manager = GameManagerImpl();
     super.initState();
   }
 
@@ -45,61 +28,55 @@ class _GameFieldState extends State<GameField> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<GameState<Field>>(
-      stream: manager.state,
-      builder: (context, snapshot) {
-        final data = snapshot.data;
+    return Scaffold(
+      backgroundColor: Colors.grey,
+      body: SafeArea(
+        child: Center(
+          child: _GameField(manager: manager),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: StreamBuilder<GameState<dynamic>>(
+        stream: manager.state,
+        builder: (BuildContext context, AsyncSnapshot<GameState<dynamic>> snapshot) {
+          return ControlStrip(
+            isGameRunning: snapshot.data?.isGameRunning ?? false,
+            onSpeedDown: manager.speedDown,
+            onSpeedUp: manager.speedUp,
+            onReset: manager.resetGame,
+            onPause: manager.pauseGame,
+            onResume: manager.resumeGame,
+          );
+        },
+      ),
+    );
+  }
+}
 
-        if (data == null) {
-          return SizedBox.shrink();
+class _GameField extends StatelessWidget {
+  const _GameField({
+    required this.manager,
+    Key? key,
+  }) : super(key: key);
+
+  final GameManager<CellField, CellState> manager;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<GameState<CellField>>(
+      stream: manager.state,
+      builder: (BuildContext context, AsyncSnapshot<GameState<CellField>> snapshot) {
+        final GameState<CellField>? state = snapshot.data;
+
+        if (state == null) {
+          return const SizedBox.shrink();
         }
 
-        return GridView.count(
-          crossAxisCount: data.data.length,
-          children: [
-            for (int row = 0; row < data.data.length; row++)
-              for (int column = 0; column < data.data[row].length; column++)
-                data.data[row][column] == CellState.alive ? const AliveCell() : const DeadCell(),
-            ElevatedButton(
-              child: Text('change state'),
-              onPressed: () {
-                setState(() {
-                  if (data.isGameRunning) {
-                    manager.pauseGame();
-                  } else {
-                    manager.resumeGame();
-                  }
-                });
-              },
-            )
-          ],
+        return CustomGameField(
+          data: state.data,
+          onCellChangeState: manager.setCellValue,
         );
       },
-    );
-  }
-}
-
-
-class AliveCell extends StatelessWidget {
-  const AliveCell({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const ColoredBox(
-      color: Colors.black,
-      child: SizedBox.square(dimension: 6),
-    );
-  }
-}
-
-class DeadCell extends StatelessWidget {
-  const DeadCell({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const ColoredBox(
-      color: Colors.transparent,
-      child: SizedBox.square(dimension: 6),
     );
   }
 }
