@@ -1,5 +1,5 @@
 {
-    "name": "game_of_life",
+    "name": "Game Of Life",
     "short_name": "game_of_life",
     "start_url": ".",
     "display": "standalone",

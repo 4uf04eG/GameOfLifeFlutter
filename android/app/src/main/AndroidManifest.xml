@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ilya.game_of_life">
    <application
-        android:label="game_of_life"
+        android:label="Game Of Life"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
