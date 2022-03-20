@@ -25,9 +25,10 @@ class ControlStrip extends StatelessWidget {
         color: Colors.white,
         boxShadow: const <BoxShadow>[
           BoxShadow(
-            blurRadius: 20,
+            color: Colors.black45,
+            blurRadius: 10,
             offset: Offset(-5, 5),
-          )
+          ),
         ],
         borderRadius: BorderRadius.circular(10),
       ),

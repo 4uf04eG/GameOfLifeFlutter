@@ -5,26 +5,30 @@ import 'package:game_of_life/data/index.dart';
 import 'package:game_of_life/domain/index.dart';
 
 class GameManagerImpl implements GameManager<CellField, CellState> {
-  GameManagerImpl() {
+  GameManagerImpl({
+    required StateProvider<CellField> stateProvider,
+  }) : _stateProvider = stateProvider {
     _initGame();
   }
 
   @override
-  late final Stream<GameStateImpl> state;
+  late final Stream<GameState<CellField>> state;
 
-  late final StreamController<GameStateImpl> _controller;
-  late GameStateImpl _lastState;
+  final StateProvider<CellField> _stateProvider;
+  late final StreamController<GameState<CellField>> _controller;
+  late GameState<CellField> _lastState;
 
   late GameConfiguration _configuration;
   Timer? _timer;
 
   void _initGame() {
-    _controller = StreamController<GameStateImpl>();
+    _controller = StreamController<GameState<CellField>>();
     state = _controller.stream.asBroadcastStream();
 
     _configuration = const GameConfigurationImpl();
-    _setState(GameStateImpl.empty(_configuration.gridSize));
+    _setState(GameStateImpl.fromProvider(_stateProvider));
   }
+
   @override
   void pauseGame() {
     _timer?.cancel();
@@ -37,7 +41,7 @@ class GameManagerImpl implements GameManager<CellField, CellState> {
     _setupTimer();
   }
 
-  void _setState(GameStateImpl state) {
+  void _setState(GameState<CellField> state) {
     _lastState = state;
     _controller.add(state);
   }
@@ -46,17 +50,19 @@ class GameManagerImpl implements GameManager<CellField, CellState> {
     _timer?.cancel();
     _timer = Timer.periodic(
       Duration(milliseconds: _configuration.tickTimeInMs),
-      (_) => moveToNextState(),
+      (_) => _moveToNextState(),
     );
   }
 
-  @override
-  void moveToNextState() {
-    final GameStateImpl original = _lastState.copyWith(data: [for (final List<CellState> row in _lastState.data) [...row]]);
-    final int gridSize = _configuration.gridSize;
+  void _moveToNextState() {
+    final GameState<CellField> original = _lastState.copyWith(data: <List<CellState>>[
+      for (final List<CellState> row in _lastState.data) <CellState>[...row]
+    ]);
+    final int height = _lastState.height;
+    final int width = _lastState.width;
 
-    for (int row = 0; row < gridSize; row++) {
-      for (int column = 0; column < gridSize; column++) {
+    for (int row = 0; row < height; row++) {
+      for (int column = 0; column < width; column++) {
         final int neighboursCount = original.calculateNumberOfNeighbors(column, row);
 
         if (neighboursCount < 2) {
@@ -83,7 +89,6 @@ class GameManagerImpl implements GameManager<CellField, CellState> {
   void speedUp() {
     final int step = _configuration.tickStep;
     final int time = _configuration.tickTimeInMs;
-    _timer?.cancel();
     updateConfiguration(_configuration.copyWith(tickTimeInMs: max(time - step, 0)));
   }
 
@@ -91,7 +96,6 @@ class GameManagerImpl implements GameManager<CellField, CellState> {
   void speedDown() {
     final int step = _configuration.tickStep;
     final int time = _configuration.tickTimeInMs;
-    _timer?.cancel();
     updateConfiguration(_configuration.copyWith(tickTimeInMs: min(time + step, 1000)));
   }
 
@@ -106,12 +110,13 @@ class GameManagerImpl implements GameManager<CellField, CellState> {
 
   @override
   void resetGame() {
-    _setState(GameStateImpl.empty(_configuration.gridSize));
+    _setState(GameStateImpl.fromProvider(_stateProvider));
     _timer?.cancel();
   }
 
   @override
   Future<void> dispose() async {
+    _timer?.cancel();
     await _controller.close();
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:game_of_life/app/pages/game_field_page.dart';
+import 'package:game_of_life/app/pages/menu_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,12 +11,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Game of Life',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.deepOrange,
       ),
-      home: const GameFieldPage(),
+      home: const MenuPage(),
     );
   }
 }

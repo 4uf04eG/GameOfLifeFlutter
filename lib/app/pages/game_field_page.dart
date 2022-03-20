@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:game_of_life/app/widgets/return_button.dart';
 import 'package:game_of_life/app/widgets/control_strip.dart';
 import 'package:game_of_life/app/widgets/game_field_painter.dart';
 import 'package:game_of_life/data/index.dart';
 import 'package:game_of_life/domain/index.dart';
 
 class GameFieldPage extends StatefulWidget {
-  const GameFieldPage({Key? key}) : super(key: key);
+  const GameFieldPage({required this.stateProvider, Key? key}) : super(key: key);
+
+  final StateProvider<dynamic> stateProvider;
 
   @override
   State<GameFieldPage> createState() => _GameFieldPageState();
@@ -16,7 +19,7 @@ class _GameFieldPageState extends State<GameFieldPage> {
 
   @override
   void initState() {
-    manager = GameManagerImpl();
+    initManager();
     super.initState();
   }
 
@@ -26,15 +29,31 @@ class _GameFieldPageState extends State<GameFieldPage> {
     super.dispose();
   }
 
+  void initManager() {
+    final StateProvider<dynamic> provider = widget.stateProvider;
+
+    if (provider is StateProvider<CellField>) {
+      manager = GameManagerImpl(stateProvider: provider);
+    } else {
+      throw Exception('Unsupported game manager');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey,
-      body: SafeArea(
-        child: Center(
-          child: _GameField(manager: manager),
-        ),
+      backgroundColor: Colors.white,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        elevation: 0.0,
+        backgroundColor: Colors.transparent,
+        toolbarHeight: 110,
+        automaticallyImplyLeading: false,
+        actions: [
+          ReturnButton(),
+        ],
       ),
+      body: _GameField(manager: manager),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: StreamBuilder<GameState<dynamic>>(
         stream: manager.state,
@@ -73,7 +92,7 @@ class _GameField extends StatelessWidget {
         }
 
         return CustomGameField(
-          data: state.data,
+          data: state,
           onCellChangeState: manager.setCellValue,
         );
       },

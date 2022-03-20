@@ -1,5 +1,11 @@
 abstract class GameState<T> {
+  const GameState();
+
   abstract final T data;
+
+  abstract final int height;
+
+  abstract final int width;
 
   abstract final bool isGameRunning;
 

@@ -3,24 +3,28 @@ import 'package:game_of_life/domain/game_configuration.dart';
 class GameConfigurationImpl extends GameConfiguration {
   const GameConfigurationImpl({
     int tickTimeInMs = 100,
-    int gridSize = 200,
     int tickStep = 10,
+    int fieldWidth = 200,
+    int fieldHeight = 200,
   }) : super(
           tickTimeInMs: tickTimeInMs,
-          gridSize: gridSize,
           tickStep: tickStep,
+          fieldWidth: fieldWidth,
+          fieldHeight: fieldHeight,
         );
 
   @override
   GameConfiguration copyWith({
     int? tickTimeInMs,
-    int? gridSize,
     int? tickStep,
+    int? fieldWidth,
+    int? fieldHeight,
   }) {
     return GameConfigurationImpl(
       tickTimeInMs: tickTimeInMs ?? this.tickTimeInMs,
-      gridSize: gridSize ?? this.gridSize,
       tickStep: tickStep ?? this.tickStep,
+      fieldWidth: fieldWidth ?? this.fieldWidth,
+      fieldHeight: fieldHeight ?? this.fieldHeight,
     );
   }
 }

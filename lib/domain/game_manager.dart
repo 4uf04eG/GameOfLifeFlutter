@@ -1,5 +1,4 @@
-import 'package:game_of_life/domain/game_configuration.dart';
-import 'package:game_of_life/domain/game_state.dart';
+import 'package:game_of_life/domain/index.dart';
 
 abstract class GameManager<S, V> {
   const GameManager();
@@ -9,8 +8,6 @@ abstract class GameManager<S, V> {
   void pauseGame();
 
   void resumeGame();
-
-  void moveToNextState();
 
   void setCellValue(int x, int y, V value);
 

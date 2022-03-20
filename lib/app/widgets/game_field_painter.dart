@@ -12,7 +12,7 @@ class CustomGameField extends StatefulWidget {
     Key? key,
   }) : super(key: key);
 
-  final CellField data;
+  final GameState<CellField> data;
   final OnCellChangeState onCellChangeState;
 
   @override
@@ -22,23 +22,30 @@ class CustomGameField extends StatefulWidget {
 class _CustomGameFieldState extends State<CustomGameField> {
   @override
   Widget build(BuildContext context) {
-    return InteractiveViewer(
-      maxScale: 10,
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          final Size size = constraints.biggest;
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: InteractiveViewer(
+        maxScale: 40,
+        minScale: 0.1,
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final Size size = constraints.biggest;
+            final double itemSize = max(size.width, size.height) / min(widget.data.width, widget.data.height);
 
-          return _GestureHandler(
-            itemSize: min(size.width, size.height) / widget.data.length,
-            data: widget.data,
-            onCellChangeState: widget.onCellChangeState,
-            child: CustomPaint(
-              painter: _GameFieldPainter(widget.data, widget.onCellChangeState),
-
-              size: constraints.biggest,
-            ),
-          );
-        },
+            return _GestureHandler(
+              itemSize: itemSize,
+              state: widget.data,
+              onCellChangeState: widget.onCellChangeState,
+              child: ColoredBox(
+                color: Colors.grey,
+                child: CustomPaint(
+                  painter: _GameFieldPainter(widget.data, itemSize),
+                  size: constraints.biggest,
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -46,14 +53,14 @@ class _CustomGameFieldState extends State<CustomGameField> {
 
 class _GestureHandler extends StatefulWidget {
   const _GestureHandler({
-    required this.data,
+    required this.state,
     required this.onCellChangeState,
     required this.itemSize,
     required this.child,
     Key? key,
   }) : super(key: key);
 
-  final CellField data;
+  final GameState<CellField> state;
   final OnCellChangeState onCellChangeState;
   final double itemSize;
   final Widget child;
@@ -72,11 +79,13 @@ class _GestureHandlerState extends State<_GestureHandler> {
     final int x = position.dx ~/ widget.itemSize;
     final int y = position.dy ~/ widget.itemSize;
 
-    if (x >= widget.data.length || y >= widget.data.length || x == lastX && y == lastY) return;
+    if ((x < 0 || x >= widget.state.width) ||
+        (y < 0 || y >= widget.state.height) ||
+        (x == lastX && y == lastY)) return;
 
     lastX = x;
     lastY = y;
-    final CellState item = widget.data[y][x];
+    final CellState item = widget.state.data[y][x];
 
     if (item == CellState.alive) {
       widget.onCellChangeState(x, y, CellState.dead);
@@ -89,7 +98,6 @@ class _GestureHandlerState extends State<_GestureHandler> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: (TapDownDetails details) {
-
         isTapPressed = true;
         hitTest(details.localPosition);
       },
@@ -108,20 +116,21 @@ class _GestureHandlerState extends State<_GestureHandler> {
 }
 
 class _GameFieldPainter extends CustomPainter {
-  _GameFieldPainter(this.data, this.onCellChangeState);
+  _GameFieldPainter(this.state, this.itemSize);
 
-  final CellField data;
-  final OnCellChangeState onCellChangeState;
+  final GameState<CellField> state;
+  final double itemSize;
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (data.isEmpty) return;
+    if (state.data.isEmpty) return;
 
-    final int count = data.length;
-    final double itemSize = min(size.width, size.height) / count;
+    final CellField data = state.data;
+    final int height = state.height;
+    final int width = state.width;
 
-    for (int row = 0; row < count; row++) {
-      for (int column = 0; column < count; column++) {
+    for (int row = 0; row < height; row++) {
+      for (int column = 0; column < width; column++) {
         final bool isAlive = data[row][column] == CellState.alive;
         canvas.drawRect(
           Rect.fromLTWH(
@@ -137,5 +146,5 @@ class _GameFieldPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_GameFieldPainter oldDelegate) => oldDelegate.data != data;
+  bool shouldRepaint(_GameFieldPainter oldDelegate) => oldDelegate.state != state;
 }
