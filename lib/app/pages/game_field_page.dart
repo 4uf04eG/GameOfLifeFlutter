@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:game_of_life/app/widgets/return_button.dart';
 import 'package:game_of_life/app/widgets/control_strip.dart';
 import 'package:game_of_life/app/widgets/game_field_painter.dart';
+import 'package:game_of_life/app/widgets/return_button.dart';
 import 'package:game_of_life/data/index.dart';
 import 'package:game_of_life/domain/index.dart';
 
@@ -49,7 +49,7 @@ class _GameFieldPageState extends State<GameFieldPage> {
         backgroundColor: Colors.transparent,
         toolbarHeight: 110,
         automaticallyImplyLeading: false,
-        actions: [
+        actions: const <Widget>[
           ReturnButton(),
         ],
       ),

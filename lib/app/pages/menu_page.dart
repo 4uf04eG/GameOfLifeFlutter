@@ -15,7 +15,7 @@ class MenuPage extends StatelessWidget {
   }
 
   Future<File?> selectRleFile() async {
-    final FilePickerResult? result = await FilePicker.platform.pickFiles(allowedExtensions: <String>['rle']);
+    final FilePickerResult? result = await FilePicker.platform.pickFiles();
 
     if (result == null || result.count == 0) {
       return null;
@@ -112,7 +112,7 @@ class _SizeSelectionDialogState extends State<_SizeSelectionDialog> {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (context, constraints) => AlertDialog(
+      builder: (BuildContext context, BoxConstraints constraints) => AlertDialog(
         content: Row(
           children: <Widget>[
             _NumberPicker(
@@ -125,7 +125,7 @@ class _SizeSelectionDialogState extends State<_SizeSelectionDialog> {
                 },
               ),
             ),
-            Spacer(),
+            const Spacer(),
             _NumberPicker(
               label: 'Width',
               height: constraints.maxHeight / 3,
@@ -138,7 +138,7 @@ class _SizeSelectionDialogState extends State<_SizeSelectionDialog> {
             ),
           ],
         ),
-        actions: [
+        actions: <Widget>[
           TextButton(
             child: const Text('CANCEL'),
             onPressed: () {

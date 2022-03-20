@@ -8,7 +8,7 @@ class ReturnButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(30),
       child: DecoratedBox(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.black45,
         ),
@@ -18,8 +18,8 @@ class ReturnButton extends StatelessWidget {
             // customBorder: CircleBorder(),
             padding: EdgeInsets.zero,
             splashRadius: 50,
-            icon: Center(
-              child: const Icon(
+            icon: const Center(
+              child: Icon(
                 Icons.close,
                 color: Colors.white,
                 size: 35,
