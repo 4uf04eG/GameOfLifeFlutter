@@ -103,6 +103,8 @@ class _GestureHandlerState extends State<_GestureHandler> {
       },
       onTapUp: (_) {
         isTapPressed = false;
+        lastX = null;
+        lastY = null;
       },
       onHorizontalDragUpdate: (DragUpdateDetails details) {
         hitTest(details.localPosition);
