@@ -4,7 +4,7 @@ Long story **!short**. For a long time, I did almost no pet projects and decided
 
 As it does not use HashLife, the maximum board size can be set up to **900x900** due to huge performance problems and big memory consumption. However, RLE files' parsing supports unlimited sizes (but try it at your peril as it could use all your memory)
 
-And be aware that there are problems with the pinching on some OSes as an InteractiveViewer which provides zoom functionality don't handle some native Desktop events yet. If you can use the mouse to zoom. Mobile platforms should work fine especially considering that the design was made for bigger screens. And yeah, plus/minus on the control panel are not for zooming, but for speed change. I know it's a quite bad design decision but who cares.
+And be aware that there are problems with the pinching on some platforms as an InteractiveViewer which provides zoom functionality don't handle some native Desktop events yet. If you can use the mouse to zoom. Mobile platforms should work fine especially considering that the design was made for bigger screens. And yeah, plus/minus on the control panel are not for zooming, but for speed change. I know it's a quite bad design decision but who cares.
 
 Tested on **MacOS**
 
